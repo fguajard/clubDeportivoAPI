@@ -1,4 +1,4 @@
-# template-node-http
+# template-api-rest
 
 ## Deploying to Heroku
 
