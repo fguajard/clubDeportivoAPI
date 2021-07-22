@@ -4,9 +4,9 @@ const url = require("url");
 
 const server = http
   .createServer((req, res) => {
-    let usuariosJson
+    let deportesJson
     try {
-      usuariosJson = JSON.parse(fs.readFileSync("Usuarios.json", "utf8"));
+      deportesJson = JSON.parse(fs.readFileSync("data/Deportes.json", "utf8"));
     } catch (error) {
       console.log(error);
       res.statusCode = 500;
@@ -108,18 +108,18 @@ const server = http
     }
 
     // RUTAS API REST
-    else if (req.url == "/usuarios" && req.method == "GET") {
+    else if (req.url == "/deportes" && req.method == "GET") {
       try {
         res.writeHead(200, { "Content-Type": "application/json" });
-        res.end(JSON.stringify(usuariosJson));
+        res.end(JSON.stringify(deportesJson));
       } catch (error) {
-        console.log(`error al leer Usuarios ${error}`);
+        console.log(`error al leer Deportes ${error}`);
         res.statusCode = 500;
         res.end("Usuarios no Disponibles");
       }
     } 
     
-    else if (req.url === "/usuarios" && req.method === "POST") {             
+    else if (req.url === "/agregar" && req.method === "POST") {             
         let body = ""
         req.on("data", (chunk) => {           
            try {
@@ -131,22 +131,22 @@ const server = http
         req.on("end", () => {  
           if(!body){
             res.statusCode = 500;
-            return res.end("Usuario no Agregado"); 
+            return res.end("Deporte no Agregado"); 
           }        
-          usuariosJson.push(body);
-          fs.writeFileSync("Usuarios.json", JSON.stringify(usuariosJson));
+          deportesJson.push(body);
+          fs.writeFileSync("data/Deportes.json", JSON.stringify(deportesJson));
           res.writeHead(201, { "Content-Type": "application/json" });
           res.end(JSON.stringify(body));
         });              
         
     } 
     
-    else if (req.url.startsWith("/usuarios") && req.method === "DELETE") {
+    else if (req.url.startsWith("/eliminar") && req.method === "DELETE") {
       try {
         const { index } = url.parse(req.url, true).query;        
         if (index) {
-          const usuarioEliminado = usuariosJson.splice(index, 1);
-          fs.writeFileSync("Usuarios.json", JSON.stringify(usuariosJson));
+          const usuarioEliminado = deportesJson.splice(index, 1);
+          fs.writeFileSync("data/Deportes.json", JSON.stringify(deportesJson));
           res.writeHead(200, { "Content-Type": "application/json" });
           res.end(JSON.stringify(usuarioEliminado));
         }
@@ -154,13 +154,13 @@ const server = http
           throw "Elemento en query string es invalido";
         }
       } catch (error) {
-        console.log(`error al eliminar un usuarios ${error}`);
+        console.log(`error al eliminar un deporte ${error}`);
         res.statusCode = 500;
-        res.end("Usuario no Eliminado");
+        res.end("Deporte no Eliminado");
       }
     } 
     
-    else if (req.url.startsWith("/usuarios") && req.method === "PUT") {
+    else if (req.url.startsWith("/editar") && req.method === "PUT") {
       try {
         const { index } = url.parse(req.url, true).query;
         if (index) {
@@ -175,20 +175,20 @@ const server = http
           req.on("end", () => {
             if(!body){
               res.statusCode = 500;
-              return res.end("Usuario no Agregado"); 
+              return res.end("Deporte no Editado"); 
             }     
-            usuariosJson[index] = body;
-            fs.writeFileSync("Usuarios.json", JSON.stringify(usuariosJson));
+            deportesJson[index] = body;
+            fs.writeFileSync("data/Deportes.json", JSON.stringify(deportesJson));
             res.writeHead(200, { "Content-Type": "application/json" });
             res.end(JSON.stringify(body));
           });
-          fs.writeFileSync("Usuarios.json", JSON.stringify(usuariosJson));
+          fs.writeFileSync("data/Deportes.json", JSON.stringify(deportesJson));
         }
         else{
           throw "Elemento en query string es invalido";
         }
       } catch (error) {
-        console.log(`error al alterar un usuarios ${error}`);
+        console.log(`error al alterar un deporte ${error}`);
         res.statusCode = 500;
         res.end("Update fallido");
       }
@@ -205,7 +205,7 @@ const server = http
         res.end(JSON.stringify(error));
       }
     }
-  })
+  }).listen(process.env.PORT || 3000);
   
 
-  server.listen(process.env.PORT || 3000);
+module.exports = server
